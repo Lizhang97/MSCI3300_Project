@@ -114,7 +114,7 @@ ACCESS = {
 }
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'xzhang270_users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
@@ -255,6 +255,10 @@ def account():
 
     return render_template('account_detail.html', form=form, pageTitle='Your Account')
 
+#first page for guest
+@app.route('/guest_page')
+def guest_page():
+    return render_template('guest_page.html', pageTitle='Welcome as a Guest')
 
 
 ################ USER ACCESS FUNCTIONALITY OR GREATER ###################
@@ -264,6 +268,12 @@ def account():
 @requires_access_level(ACCESS['user'])
 def dashboard():
     return render_template('dashboard.html', pageTitle='My Flask App Dashboard')
+
+# first new page for users
+@app.route('/user_page')
+@requires_access_level(ACCESS['user'])
+def user_page():
+    return render_template('user_page.html', pageTitle='Welcome as a User')
 
 
 ################ ADMIN ACCESS FUNCTIONALITY ###################
@@ -347,7 +357,11 @@ def new_user():
 
     return render_template('new_user.html',  pageTitle='New User | My Flask App', form=form)
 
-
+#first new page for admins
+@app.route('/admin_page')
+@requires_access_level(ACCESS['admin'])
+def admin_page():
+    return render_template('admin_page.html', pageTitle='Welcome as an Admin')
 
 
 if __name__ == '__main__':

@@ -28,26 +28,33 @@
                     <a class="nav-link" href="/login">Login</a>
                 </li>
 
+
                 {% else %}
 
                 {% if current_user.is_admin() %}
                 <li class="nav-item">
                     <a class="nav-link" href="/control_panel">Control Panel</a>
+                    <a class="nav-link" href="/admin_page">Admin</a>
                 </li>
                 {% endif %}
 
                 {% if current_user.is_admin() or current_user.is_user() %}
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <a class="nav-link" href="/user_page">User</a>
                 </li>
                 {% endif %}
 
                 <li class="nav-item">
                     <a class="nav-link" href="/account">Account</a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/guest_page">Guest</a>
                 </li>
 
                 {% endif %}
