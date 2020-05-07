@@ -22,12 +22,12 @@ dbname=os.environ.get('DBNAME')
 #conn = "mysql+pymysql://{0}:{1}@{2}/{3}".format(secrets.dbuser, secrets.dbpass, secrets.dbhost, secrets.dbname)
 conn="mysql+pymysql://{0}:{1}@{2}/{3}".format(dbuser,dbpass,dbhost,dbname)
 # Open database connection
-dbhost = secrets.dbhost
-dbuser = secrets.dbuser
-dbpass = secrets.dbpass
-dbname = secrets.dbname
+#dbhost = secrets.dbhost
+#dbuser = secrets.dbuser
+#dbpass = secrets.dbpass
+#dbname = secrets.dbname
 
-#db = pymysql.connect(dbhost, dbuser, dbpass, dbname)
+db = pymysql.connect(dbhost, dbuser, dbpass, dbname)
 
 app = Flask(__name__)
 
