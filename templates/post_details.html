@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h1>Post Details</h1>
+<hr />
+{% from "includes/_formhelpers.html" import render_field %}
+<div>
+  <form action="" method="POST" id="post_details">
+    {{ form.csrf_token }}
+
+    {% if form %}
+
+    <div class="form-group">
+      <label>{{ form.postid.label }}</label>
+      {{ form.postid(readonly=True, class="form-control")}}
+      {% for error in form.postid.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.movie.label }}</label>
+        {{ form.movie(class="form-control") }}
+        {% for error in form.movie.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.myr.label }}</label>
+        {{ form.myr(class="form-control") }}
+        {% for error in form.myr.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+
+<hr/>
+    <div class="form-group">
+      <label>{{ form.mimg.label }}</label>
+      {{ form.mimg(class="form-control", placeholder="test_img1") }}
+      {% for error in form.mimg.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.song.label }}</label>
+        {{ form.song(class="form-control") }}
+        {% for error in form.song.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.singer.label }}</label>
+        {{ form.singer(class="form-control") }}
+        {% for error in form.singer.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+      <label>{{ form.simg.label }}</label>
+      {{ form.simg(class="form-control", placeholder="test_img2") }}
+      {% for error in form.simg.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.quote.label }}</label>
+        {{ form.quote(class="form-control") }}
+        {% for error in form.quote.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.book.label }}</label>
+        {{ form.book(class="form-control") }}
+        {% for error in form.book.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.writer.label }}</label>
+        {{ form.writer(class="form-control") }}
+        {% for error in form.writer.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label>{{ form.qimg.label }}</label>
+        {{ form.qimg(class="form-control", placeholder="test_img3") }}
+        {% for error in form.qimg.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+  </form>
+
+  <button type="submit" form="post_details" formmethod="POST" formaction="{{ url_for('update_post', postid=form.postid.data) }}" class="btn btn-primary">Update Post</button>
+
+  <button type="submit" form="post_details" formmethod="POST" formaction="{{ url_for('delete_post', postid=form.postid.data) }}" class="btn btn-danger">Delete Post</button>
+
+
+
+
+</div>
+
+{% endblock %}

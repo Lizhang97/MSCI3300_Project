@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block body %}
+  <h1>All Posts</h1>
+
+  <div>
+
+    {% if posts %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+
+                <th>PostID</th>
+                <th>Movie</th>
+                <th>Year</th>
+                <th>Img1</th>
+                <th>Music</th>
+                <th>Artist</th>
+                <th>Img2</th>
+                <th>Quote</th>
+                <th>Book</th>
+                <th>Writer</th>
+                <th>Img3</th>
+                <th><form action="{{ url_for('add_post') }}" method="GET">
+                  <input type="submit" value="New Post" class="btn btn-secondary" />
+                </form></th>
+
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in posts %}
+            <tr>
+
+                <td> {{ row.postid }}</td>
+                <td> {{ row.movie }}</td>
+                <td> {{ row.myr }}</td>
+                <td> {{ row.mimg }}</td>
+                <td> {{ row.song }}</td>
+                <td> {{ row.singer }}</td>
+                <td> {{ row.simg }}</td>
+                <td> {{ row.quote }}</td>
+                <td> {{ row.book }}</td>
+                <td> {{ row.writer }}</td>
+                <td> {{ row.qimg }}</td>
+                <td>
+                <form action="{{ url_for('post_details', postid=row.postid) }}" method="POST">
+                    <input type="submit" value="Details" class="btn btn-outline-dark btn-sm" />
+                </form>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+  </div>
+{% endblock %}

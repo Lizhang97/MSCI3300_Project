@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div>
+
+
+  {% if posts %}
+  {% for row in posts %}
+  <div class="card" style="width: 17rem; display: inline-block;">
+    <img src="../static/images/{{row.postid}}.png" class="card-img-top">
+    <div class="card-body">
+      <h5 class="card-title"> Post {{ row.postid }}</h5>
+      <p class="card-text" >{{ row.movie }}</p>
+      <p class="card-text" >{{ row.song }}</p>
+      <p class="card-text" >{{ row.book }}</p>
+      <div style="text-align:center;">
+        <form action="{{ url_for('post_design', postid=row.postid) }}" method="POST">
+          <input type="submit" value="More" class="btn btn-outline-dark btn-sm">
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -7,23 +7,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required
 from functools import wraps
+from sqlalchemy import or_, func
+import random
 import pymysql
 import secrets
 import os
 
-dbuser=os.environ.get('DBUSER')
-dbpass=os.environ.get('DBPASS')
-dbhost=os.environ.get('DBHOST')
-dbname=os.environ.get('DBNAME')
+#dbuser=os.environ.get('DBUSER')
+#dbpass=os.environ.get('DBPASS')
+#dbhost=os.environ.get('DBHOST')
+#dbname=os.environ.get('DBNAME')
 
 
-#conn = "mysql+pymysql://{0}:{1}@{2}/{3}".format(secrets.dbuser, secrets.dbpass, secrets.dbhost, secrets.dbname)
-conn="mysql+pymysql://{0}:{1}@{2}/{3}".format(dbuser,dbpass,dbhost,dbname)
+conn = "mysql+pymysql://{0}:{1}@{2}/{3}".format(secrets.dbuser, secrets.dbpass, secrets.dbhost, secrets.dbname)
+#conn="mysql+pymysql://{0}:{1}@{2}/{3}".format(dbuser,dbpass,dbhost,dbname)
 # Open database connection
-#dbhost = secrets.dbhost
-#dbuser = secrets.dbuser
-#dbpass = secrets.dbpass
-#dbname = secrets.dbname
+dbhost = secrets.dbhost
+dbuser = secrets.dbuser
+dbpass = secrets.dbpass
+dbname = secrets.dbname
 
 #db = pymysql.connect(dbhost, dbuser, dbpass, dbname)
 
@@ -112,6 +114,39 @@ class AccountDetailForm(FlaskForm):
     confirm = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
 
 
+class PostForm(FlaskForm):
+    postid = IntegerField('Post ID:')
+    movie=StringField('Movie Title:', validators=[DataRequired()])
+    myr=IntegerField('Movie Year:', validators=[DataRequired()])
+    mimg=StringField('Movie Poster:', validators=[DataRequired()])
+    song=StringField('Music Name:', validators=[DataRequired()])
+    singer=StringField('Singer:', validators=[DataRequired()])
+    simg=StringField('Album Image:', validators=[DataRequired()])
+    quote=StringField('Quote:', validators=[DataRequired()])
+    book=StringField('Book Title:', validators=[DataRequired()])
+    writer=StringField('Writer:', validators=[DataRequired()])
+    qimg=StringField('Book Image:', validators=[DataRequired()])
+
+
+class xzhang270_post(db.Model):
+    postid = db.Column(db.Integer, primary_key=True)
+    movie=db.Column(db.String(100))
+    myr=db.Column(db.Integer)
+    mimg=db.Column(db.String(30))
+    song=db.Column(db.String(100))
+    singer=db.Column(db.String(100))
+    simg=db.Column(db.String(40))
+    quote=db.Column(db.String(1000))
+    book=db.Column(db.String(100))
+    writer=db.Column(db.String(100))
+    qimg=db.Column(db.String(30))
+
+    def __repr__(self):
+        return '<Post {0}>'.format(self.postid)
+
+
+
+
 ACCESS = {
     'guest': 0,
     'user': 1,
@@ -190,9 +225,9 @@ def index():
     return render_template('index.html', pageTitle='Flask App Home Page')
 
 # about
-@app.route('/about')
-def about():
-    return render_template('about.html', pageTitle='About My Flask App')
+#@app.route('/about')
+#def about():
+#    return render_template('about.html', pageTitle='About My Flask App')
 
 # registration
 @app.route('/register', methods=['GET', 'POST'])
@@ -268,27 +303,81 @@ def guest_page():
 
 ################ USER ACCESS FUNCTIONALITY OR GREATER ###################
 
-# dashboard
-@app.route('/dashboard')
-@requires_access_level(ACCESS['user'])
-def dashboard():
-    return render_template('dashboard.html', pageTitle='My Flask App Dashboard')
+# post cards
+@app.route('/post')
+def post():
+    all_posts = xzhang270_post.query.all()
+    rand = random.randint(1,5)
+    return render_template('post.html', posts=all_posts, rand=rand, pageTitle='Post Cards')
 
-# first new page for users
-@app.route('/user_page')
-@requires_access_level(ACCESS['user'])
-def user_page():
-    return render_template('user_page.html', pageTitle='Welcome as a User')
+# post design
+@app.route('/post_design/<int:postid>', methods=['GET','POST'])
+def post_design(postid):
+    previd=0
+    nextid=0
+    maxid =db.session.query(db.func.max(xzhang270_post.postid)).scalar()
+    id_tuple=db.session.query(xzhang270_post.postid).all()
+    id_list= [value for (value,) in id_tuple]
+    post = xzhang270_post.query.get_or_404(postid)
+    postid=post.postid
+    if postid>1:
+        previd=id_list[id_list.index(postid)-1]
+    if postid<maxid:
+        nextid=id_list[id_list.index(postid)+1]
+    movie=post.movie
+    myr=post.myr
+    mimg=post.mimg
+    music=post.song
+    artist=post.singer
+    simg=post.simg
+    quote=post.quote
+    book=post.book
+    writer=post.writer
+    qimg=post.qimg
+    return render_template('post_design.html',pageTitle='Movie·Music·Mood',
+    maxid=maxid, previd=previd, nextid=nextid, postid=postid, movie=movie, myr=myr, mimg=mimg,music=music,artist=artist,
+    simg=simg, quote=quote, book=book, writer=writer, qimg=qimg)
+
+
+
+# search post (user version)
+@app.route('/search_postcard', methods=['GET','POST'])
+def search_postcard():
+    if request.method=='POST':
+        form=request.form
+        search_value=form['search_string']
+        search='%{}%'.format(search_value)
+        results=xzhang270_post.query.filter(or_(xzhang270_post.movie.like(search),
+                                                xzhang270_post.myr.like(search),
+                                                xzhang270_post.song.like(search),
+                                                xzhang270_post.singer.like(search),
+                                                xzhang270_post.quote.like(search),
+                                                xzhang270_post.book.like(search),
+                                                xzhang270_post.writer.like(search))).all()
+        flash('All search results are shown.','success')
+        return render_template('post.html', posts=results, pageTitle='Search Results', legend='Search Results')
+    else:
+        return redirect('/post')
+
+
 
 
 ################ ADMIN ACCESS FUNCTIONALITY ###################
 
-# control panel
-@app.route('/control_panel')
+# control panel for users
+@app.route('/all_users')
 @requires_access_level(ACCESS['admin'])
-def control_panel():
+def all_users():
     all_users = User.query.all()
-    return render_template('control_panel.html', users=all_users, pageTitle='My Flask App Control Panel')
+    return render_template('all_users.html', users=all_users, pageTitle='All Users')
+
+#control panel for posts
+@app.route('/all_posts')
+@requires_access_level(ACCESS['admin'])
+def all_posts():
+    all_posts = xzhang270_post.query.all()
+    return render_template('all_posts.html', posts=all_posts, pageTitle='All Posts')
+
 
 # user details & update
 @app.route('/user_detail/<int:user_id>', methods=['GET','POST'])
@@ -322,16 +411,16 @@ def update_user(user_id):
             valid_user = User.query.filter_by(username=new_user).first() # query the database for the usernam
             if valid_user is not None:
                 flash("That username is already taken...", 'danger')
-                return redirect(url_for('control_panel'))
+                return redirect(url_for('all_users'))
 
         # if the values are the same, we can move on.
         user.username = form.username.data
         user.access = request.form['access_lvl']
         db.session.commit()
         flash('The user has been updated.', 'success')
-        return redirect(url_for('control_panel'))
+        return redirect(url_for('all_users'))
 
-    return redirect(url_for('control_panel'))
+    return redirect(url_for('all_users'))
 
 # delete user
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
@@ -342,9 +431,9 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         flash('User has been deleted.', 'success')
-        return redirect(url_for('control_panel'))
+        return redirect(url_for('all_users'))
 
-    return redirect(url_for('control_panel'))
+    return redirect(url_for('all_users'))
 
 # new user
 @app.route('/new_user', methods=['GET', 'POST'])
@@ -362,11 +451,109 @@ def new_user():
 
     return render_template('new_user.html',  pageTitle='New User | My Flask App', form=form)
 
-#first new page for admins
-@app.route('/admin_page')
+
+#add new post
+@app.route('/add_post', methods=['GET','POST'])
+def add_post():
+    form = PostForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        post=xzhang270_post(movie=form.movie.data, myr=form.myr.data, mimg=form.mimg.data,
+        song=form.song.data, singer=form.singer.data, simg=form.simg.data,
+        quote=form.quote.data, book=form.book.data, writer=form.writer.data, qimg=form.qimg.data)
+        db.session.add(post)
+        db.session.commit()
+        flash('Post has been successfully added.', 'success')
+        return redirect(url_for('all_posts'))
+
+    return render_template('add_post.html', form=form, pageTitle='Add A New Post')
+
+
+# search post (admin version)
+@app.route('/search_post', methods=['GET','POST'])
+def search_post():
+    if request.method=='POST':
+        form=request.form
+        search_value=form['search_string']
+        search='%{}%'.format(search_value)
+        results=xzhang270_post.query.filter(or_(xzhang270_post.movie.like(search),
+                                                xzhang270_post.myr.like(search),
+                                                xzhang270_post.song.like(search),
+                                                xzhang270_post.singer.like(search),
+                                                xzhang270_post.quote.like(search),
+                                                xzhang270_post.book.like(search),
+                                                xzhang270_post.writer.like(search))).all()
+        flash('All search results are shown.','success')
+        return render_template('all_posts.html', posts=results, pageTitle='Search Results', legend='Search Results')
+    else:
+        return redirect('/all_posts')
+
+#delete post
+@app.route('/delete_post/<int:postid>', methods=['POST'])
 @requires_access_level(ACCESS['admin'])
-def admin_page():
-    return render_template('admin_page.html', pageTitle='Welcome as an Admin')
+def delete_post(postid):
+    if request.method=='POST':
+        post=xzhang270_post.query.get_or_404(postid)
+        db.session.delete(post)
+        db.session.commit()
+        flash('User has been deleted.', 'success')
+        return redirect(url_for('all_posts'))
+    else:
+        return redirect(url_for('all_posts'))
+
+#post detail
+@app.route('/post_detail/<int:postid>', methods=['GET','POST'])
+@requires_access_level(ACCESS['admin'])
+def post_details(postid):
+    post = xzhang270_post.query.get_or_404(postid)
+    form = PostForm()
+    form.postid.data=post.postid
+    form.movie.data=post.movie
+    form.myr.data=post.myr
+    form.mimg.data=post.mimg
+    form.song.data=post.song
+    form.singer.data=post.singer
+    form.simg.data=post.simg
+    form.quote.data=post.quote
+    form.book.data=post.book
+    form.writer.data=post.writer
+    form.qimg.data=post.qimg
+    return render_template('post_details.html', form=form, pageTitle='Post Details')
+
+
+
+#update post
+@app.route('/post/<int:postid>/update', methods=['GET','POST'])
+@requires_access_level(ACCESS['admin'])
+def update_post(postid):
+    post=xzhang270_post.query.get_or_404(postid)
+    form=PostForm()
+
+    if form.validate_on_submit():
+        post.movie=form.movie.data
+        post.myr=form.myr.data
+        post.mimg=form.mimg.data
+        post.song=form.song.data
+        post.singer=form.singer.data
+        post.simg=form.simg.data
+        post.quote=form.quote.data
+        post.book=form.book.data
+        post.writer=form.writer.data
+        post.qimg=form.qimg.data
+        db.session.commit()
+        return redirect(url_for('all_posts'))
+    form.postid.data=post.postid
+    form.movie.data=post.movie
+    form.myr.data=post.myr
+    form.mimg.data=post.mimg
+    form.song.data=post.song
+    form.singer.data=post.singer
+    form.simg.data=post.simg
+    form.quote.data=post.quote
+    form.book.data=post.book
+    form.writer.data=post.writer
+    form.qimg.data=post.qimg
+
+    return redirect(url_for('all_posts'))
 
 
 if __name__ == '__main__':

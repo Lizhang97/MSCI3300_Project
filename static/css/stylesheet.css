@@ -1,3 +1,29 @@
-body {
-  background-color: lightblue;
+h1 {
+  font-family: 'Special Elite', cursive;
+}
+
+label {
+  font-family: 'Special Elite', cursive;
+}
+
+button {
+  font-family: 'Special Elite', cursive;
+}
+
+.nav-link{
+  font-family: 'Special Elite', cursive;
+}
+
+.card-body {
+  text-align: center;
+}
+
+.card-title {
+  font-family: 'Yesteryear', cursive;
+  text-align: center;
+}
+
+.card-text {
+  font-family: 'Special Elite', cursive;
+  text-align: center;
 }
